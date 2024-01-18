@@ -125,21 +125,24 @@ export class Template<P> {
     });
 
     if (this.type !== 'map') {
-      const callbackFn = Platform.select({
-        android: ({ error }: { error?: string } = {}) => {
-          error && console.error(error);
-        },
-      });
-      CarPlay.bridge.createTemplate(
-        this.id,
-        this.parseConfig({ type: this.type, ...config }),
-        callbackFn,
-      );
+      if (Platform.OS === 'android') {
+        CarPlay.bridge.createTemplate(
+          this.id,
+          this.parseConfig({ type: this.type, ...config }),
+          ({ error }: { error?: string } = {}) => {
+            error && console.error(error);
+          },
+        );
+      } else {
+        CarPlay.bridge.createTemplate(
+          this.id,
+          this.parseConfig({ type: this.type, ...config })
+        );
+      }
     }
   }
 
   updateTemplate = (config: P) => {
-    console.log('LETSGO!', config, this.type);
     CarPlay.bridge.updateTemplate(this.id, this.parseConfig({ type: this.type, ...config }));
   };
 

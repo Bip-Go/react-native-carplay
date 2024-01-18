@@ -92,6 +92,7 @@ RCT_EXPORT_MODULE();
         @"albumArtistButtonPressed",
         // poi
         @"didSelectPointOfInterest",
+        @"didChangeMapRegion",
         // map
         @"mapButtonPressed",
         @"didUpdatePanGestureWithTranslation",
@@ -395,6 +396,45 @@ RCT_EXPORT_METHOD(createTemplate:(NSString *)templateId config:(NSDictionary*)co
 
     [carPlayTemplate setUserInfo:@{ @"templateId": templateId }];
     [store setTemplate:templateId template:carPlayTemplate];
+}
+
+RCT_EXPORT_METHOD(updateTemplate:(NSString *)templateId config:(NSDictionary*)config) {
+    // Get the shared instance of the RNCPStore class
+    RNCPStore *store = [RNCPStore sharedManager];
+    CPTemplate *template = [store findTemplateById:templateId];
+
+    // Extract values from the 'config' dictionary
+    NSString *title = [RCTConvert NSString:config[@"title"]];
+    NSArray *leadingNavigationBarButtons = [self parseBarButtons:[RCTConvert NSArray:config[@"leadingNavigationBarButtons"]] templateId:templateId];
+    NSArray *trailingNavigationBarButtons = [self parseBarButtons:[RCTConvert NSArray:config[@"trailingNavigationBarButtons"]] templateId:templateId];
+
+    if ([template isKindOfClass:CPSearchTemplate.class]) {
+    } else if ([template isKindOfClass:CPGridTemplate.class]) {
+    } else if ([template isKindOfClass:CPListTemplate.class]) {
+    } else if ([template isKindOfClass:CPMapTemplate.class]) {
+    } else if ([template isKindOfClass:CPVoiceControlTemplate.class]) {
+    } else if ([template isKindOfClass:CPNowPlayingTemplate.class]) {
+    } else if ([template isKindOfClass:CPTabBarTemplate.class]) {
+    } else if ([template isKindOfClass:CPContactTemplate.class]) {
+    } else if ([template isKindOfClass:CPActionSheetTemplate.class]) {
+    } else if ([template isKindOfClass:CPAlertTemplate.class]) {
+    } else if ([template isKindOfClass:CPPointOfInterestTemplate.class]) {
+        NSString *title = [RCTConvert NSString:config[@"title"]];
+        NSMutableArray<__kindof CPPointOfInterest *> *items = [NSMutableArray new];
+    
+        NSUInteger selectedIndex = 0;
+        NSArray<NSDictionary*> *_items = [RCTConvert NSDictionaryArray:config[@"items"]];
+        for (NSDictionary *_item in _items) {
+            CPPointOfInterest *poi = [RCTConvert CPPointOfInterest:_item];
+            [poi setUserInfo:_item];
+            [items addObject:poi];
+        }
+        
+        CPPointOfInterestTemplate *poiTemplate = (CPPointOfInterestTemplate *)template;
+        poiTemplate.title = title;
+        [poiTemplate setPointsOfInterest:items selectedIndex:NSNotFound];
+    } else if ([template isKindOfClass:CPInformationTemplate.class]) {
+    }
 }
 
 RCT_EXPORT_METHOD(createTrip:(NSString*)tripId config:(NSDictionary*)config) {

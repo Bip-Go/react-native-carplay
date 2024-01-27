@@ -93,6 +93,7 @@ RCT_EXPORT_MODULE();
         // poi
         @"didSelectPointOfInterest",
         @"didChangeMapRegion",
+        @"didPressPointOfInterestButton",
         // map
         @"mapButtonPressed",
         @"didUpdatePanGestureWithTranslation",
@@ -350,6 +351,8 @@ RCT_EXPORT_METHOD(createTemplate:(NSString *)templateId config:(NSDictionary*)co
         for (NSDictionary *_item in _items) {
             CPPointOfInterest *poi = [RCTConvert CPPointOfInterest:_item];
             [poi setUserInfo:_item];
+            [poi setPinImage:[RCTConvert UIImage:_item[@"pinImage"]]];
+            [poi setSelectedPinImage:[RCTConvert UIImage:_item[@"selectedPinImage"]]];
             [items addObject:poi];
         }
 
@@ -419,6 +422,8 @@ RCT_EXPORT_METHOD(updateTemplate:(NSString *)templateId config:(NSDictionary*)co
     } else if ([template isKindOfClass:CPActionSheetTemplate.class]) {
     } else if ([template isKindOfClass:CPAlertTemplate.class]) {
     } else if ([template isKindOfClass:CPPointOfInterestTemplate.class]) {
+        CPPointOfInterestTemplate *poiTemplate = (CPPointOfInterestTemplate *)template;
+        
         NSString *title = [RCTConvert NSString:config[@"title"]];
         NSMutableArray<__kindof CPPointOfInterest *> *items = [NSMutableArray new];
     
@@ -427,10 +432,52 @@ RCT_EXPORT_METHOD(updateTemplate:(NSString *)templateId config:(NSDictionary*)co
         for (NSDictionary *_item in _items) {
             CPPointOfInterest *poi = [RCTConvert CPPointOfInterest:_item];
             [poi setUserInfo:_item];
+            [poi setPinImage:[RCTConvert UIImage:_item[@"pinImage"]]];
+            [poi setSelectedPinImage:[RCTConvert UIImage:_item[@"selectedPinImage"]]];
+            
+            NSDictionary *primaryButton = [RCTConvert NSDictionary:_item[@"primaryButton"]];
+            NSDictionary *secondaryButton = [RCTConvert NSDictionary:_item[@"secondaryButton"]];
+            if (primaryButton != nil) {
+                CPTextButtonStyle buttonStyle = CPTextButtonStyleNormal;
+                NSString *_buttonStyle = [RCTConvert NSString:primaryButton[@"style"]];
+                if ([_buttonStyle isEqualToString:@"cancel"]) {
+                    buttonStyle = CPTextButtonStyleCancel;
+                } else if ([_buttonStyle isEqualToString:@"confirm"]) {
+                    buttonStyle = CPTextButtonStyleConfirm;
+                }
+                [poi setPrimaryButton:[[CPTextButton alloc]
+                                       initWithTitle:primaryButton[@"title"]
+                                       textStyle:buttonStyle
+                                       handler:^(__kindof CPTextButton * _Nonnull contactButton) {
+                    [self sendTemplateEventWithName:poiTemplate name:@"didPressPointOfInterestButton" json:@{
+                        @"poiId": _item[@"id"],
+                        @"buttonType": @"primary"
+                    }];
+                }]];
+            }
+            
+            if (secondaryButton != nil) {
+                CPTextButtonStyle buttonStyle = CPTextButtonStyleNormal;
+                NSString *buttonType = [RCTConvert NSString:secondaryButton[@"type"]];
+                if ([buttonType isEqualToString:@"cancel"]) {
+                    buttonStyle = CPTextButtonStyleCancel;
+                } else if ([buttonType isEqualToString:@"confirm"]) {
+                    buttonStyle = CPTextButtonStyleConfirm;
+                }
+                [poi setSecondaryButton:[[CPTextButton alloc]
+                                       initWithTitle:secondaryButton[@"title"]
+                                       textStyle:buttonStyle
+                                       handler:^(__kindof CPTextButton * _Nonnull contactButton) {
+                    [self sendTemplateEventWithName:poiTemplate name:@"didPressPointOfInterestButton" json:@{
+                        @"poiId": _item[@"id"],
+                        @"buttonType": @"secondary"
+                    }];
+                }]];
+            }
+            
             [items addObject:poi];
         }
         
-        CPPointOfInterestTemplate *poiTemplate = (CPPointOfInterestTemplate *)template;
         poiTemplate.title = title;
         [poiTemplate setPointsOfInterest:items selectedIndex:NSNotFound];
     } else if ([template isKindOfClass:CPInformationTemplate.class]) {
@@ -1266,7 +1313,6 @@ RCT_EXPORT_METHOD(updateMapTemplateMapButtons:(NSString*) templateId mapButtons:
     }
 }
 
-
 # pragma MapTemplate
 
 - (void)mapTemplate:(CPMapTemplate *)mapTemplate selectedPreviewForTrip:(CPTrip *)trip usingRouteChoice:(CPRouteChoice *)routeChoice {
@@ -1378,7 +1424,12 @@ RCT_EXPORT_METHOD(updateMapTemplateMapButtons:(NSString*) templateId mapButtons:
 
 # pragma PointOfInterest
 -(void)pointOfInterestTemplate:(CPPointOfInterestTemplate *)pointOfInterestTemplate didChangeMapRegion:(MKCoordinateRegion)region {
-    // noop
+    [self sendTemplateEventWithName:pointOfInterestTemplate name:@"didChangeMapRegion" json:@{
+        @"latitude": [NSNumber numberWithDouble:region.center.latitude],
+        @"longitude": [NSNumber numberWithDouble:region.center.longitude],
+        @"latitudeDelta": [NSNumber numberWithDouble:region.span.latitudeDelta],
+        @"longitudeDelta": [NSNumber numberWithDouble:region.span.longitudeDelta]
+    }];
 }
 
 -(void)pointOfInterestTemplate:(CPPointOfInterestTemplate *)pointOfInterestTemplate didSelectPointOfInterest:(CPPointOfInterest *)pointOfInterest {

@@ -1,4 +1,6 @@
+import { ImageSourcePropType } from 'react-native';
 import { Template, TemplateConfig } from './Template';
+import { TextButtonStyle, TextButtonType } from 'src/interfaces/TextButton';
 
 export interface PointOfInterestItem {
   id: string;
@@ -12,6 +14,10 @@ export interface PointOfInterestItem {
   detailTitle?: string;
   detailSubtitle?: string;
   detailSummary?: string;
+  pinImage?: ImageSourcePropType;
+  selectedPinImage?: ImageSourcePropType;
+  primaryButton?: { title: string, style: TextButtonStyle };
+  secondaryButton?: { title: string, style: TextButtonStyle };
 }
 
 export interface PointOfInterestTemplateConfig extends TemplateConfig {
@@ -24,6 +30,9 @@ export interface PointOfInterestTemplateConfig extends TemplateConfig {
     latitudeDelta: number;
     longitudeDelta: number;
   }): void;
+  onPointOfInterestButtonPress?(e: {
+    buttonType: TextButtonType;
+  }): void;
 }
 
 export class PointOfInterestTemplate extends Template<PointOfInterestTemplateConfig> {
@@ -35,6 +44,7 @@ export class PointOfInterestTemplate extends Template<PointOfInterestTemplateCon
     return {
       didSelectPointOfInterest: 'onPointOfInterestSelect',
       didChangeMapRegion: 'onChangeMapRegion',
+      didPressPointOfInterestButton: 'onPointOfInterestButtonPress',
     };
   }
 }

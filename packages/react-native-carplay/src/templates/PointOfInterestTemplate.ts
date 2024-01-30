@@ -1,6 +1,6 @@
 import { ImageSourcePropType } from 'react-native';
 import { Template, TemplateConfig } from './Template';
-import { TextButtonStyle, TextButtonType } from 'src/interfaces/TextButton';
+import { TextButtonStyle, TextButtonType } from '../interfaces/TextButton';
 
 export interface PointOfInterestItem {
   id: string;

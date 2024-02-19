@@ -352,7 +352,9 @@ RCT_EXPORT_METHOD(createTemplate:(NSString *)templateId config:(NSDictionary*)co
             CPPointOfInterest *poi = [RCTConvert CPPointOfInterest:_item];
             [poi setUserInfo:_item];
             [poi setPinImage:[RCTConvert UIImage:_item[@"pinImage"]]];
-            [poi setSelectedPinImage:[RCTConvert UIImage:_item[@"selectedPinImage"]]];
+            if (@available(iOS 16.0, *)) {
+                [poi setSelectedPinImage:[RCTConvert UIImage:_item[@"selectedPinImage"]]];
+            }
             [items addObject:poi];
         }
 
@@ -433,7 +435,9 @@ RCT_EXPORT_METHOD(updateTemplate:(NSString *)templateId config:(NSDictionary*)co
             CPPointOfInterest *poi = [RCTConvert CPPointOfInterest:_item];
             [poi setUserInfo:_item];
             [poi setPinImage:[RCTConvert UIImage:_item[@"pinImage"]]];
-            [poi setSelectedPinImage:[RCTConvert UIImage:_item[@"selectedPinImage"]]];
+            if (@available(iOS 16.0, *)) {
+                [poi setSelectedPinImage:[RCTConvert UIImage:_item[@"selectedPinImage"]]];
+            }
             
             NSDictionary *primaryButton = [RCTConvert NSDictionary:_item[@"primaryButton"]];
             NSDictionary *secondaryButton = [RCTConvert NSDictionary:_item[@"secondaryButton"]];

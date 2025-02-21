@@ -77,15 +77,10 @@ class CarPlaySession(private val reactInstanceManager: ReactInstanceManager) : S
       }
 
       catalystInstance.getJSModule(AppRegistry::class.java)
-        .runApplication(jsAppModuleName, appParams)
-
-      val timingModule = reactContext.getNativeModule(
-        TimingModule::class.java
-      )
+        ?.runApplication(jsAppModuleName, appParams)
       val carModule = reactInstanceManager
         .currentReactContext?.getNativeModule(CarPlayModule::class.java)
       carModule!!.setCarContext(carContext, screen)
-      timingModule!!.onHostResume()
 
     } catch (e: Exception) {
       e.printStackTrace()
